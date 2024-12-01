@@ -8,12 +8,24 @@ export function LoginPage() {
   const { login } = useStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(''); // Gerenciar mensagens de erro
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const success = await login(email, password);
+
     if (success) {
-      navigate('/');
+      // Obter o usuário logado
+      const { user } = useStore.getState();
+
+      // Redirecionar com base no papel do usuário
+      if (user?.role === 'admin') {
+        navigate('/admin'); // Redirecionar para o Dashboard Admin
+      } else {
+        navigate('/'); // Redirecionar para a página inicial (Menu)
+      }
+    } else {
+      setError('Email ou senha inválidos.'); // Exibir mensagem de erro
     }
   };
 
@@ -22,6 +34,7 @@ export function LoginPage() {
       <div className="text-center">
         <h1 className="text-2xl font-bold">Login</h1>
         <p className="text-gray-600">Entre para acessar sua conta</p>
+        {error && <p className="text-red-500">{error}</p>} {/* Exibe erro */}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">

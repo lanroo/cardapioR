@@ -29,7 +29,8 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'customer' | 'admin';
+  role: 'admin' | 'customer';
+  password?: string;
 }
 
 export interface CustomerInfo {
