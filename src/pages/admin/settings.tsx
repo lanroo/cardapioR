@@ -43,55 +43,84 @@ export function AdminSettings() {
 
 // Configuração do perfil
 function ProfileSettings({ user, setUser }: { user: any; setUser: any }) {
-  const [form, setForm] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    password: '',
-  });
+    const [form, setForm] = useState({
+      name: user?.name || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+      avatar: user?.avatar || '', 
+      password: '',
+      confirmPassword: '',
+    });
 
-  const handleSave = () => {
-    setUser({ ...user, ...form });
-    alert('Perfil atualizado!');
-  };
+    const handleSave = () => {
+        if (form.password !== form.confirmPassword) {
+          alert('As senhas não coincidem!');
+          return;
+        }
+        setUser({ ...user, ...form });
+        alert('Perfil atualizado!');
+      };
+    
+      return (
+        <Card className="p-6 space-y-4">
+          <h2 className="text-xl font-bold">Editar Perfil</h2>
+          <input
+            type="text"
+            placeholder="Nome"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            className="w-full rounded-md border px-3 py-2"
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            className="w-full rounded-md border px-3 py-2"
+          />
+          <input
+            type="text"
+            placeholder="Telefone"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            className="w-full rounded-md border px-3 py-2"
+          />
+          <div>
+            <label className="block text-sm font-bold mb-2">Avatar</label>
+            <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                    setForm({ ...form, avatar: URL.createObjectURL(file) });
+                    }
+                }}
+                className="w-full"
+                />
 
-  return (
-    <Card className="p-6 space-y-4">
-      <h2 className="text-xl font-bold">Editar Perfil</h2>
-      <input
-        type="text"
-        placeholder="Nome"
-        value={form.name}
-        onChange={(e) => setForm({ ...form, name: e.target.value })}
-        className="w-full rounded-md border px-3 py-2"
-      />
-      <input
-        type="email"
-        placeholder="Email"
-        value={form.email}
-        onChange={(e) => setForm({ ...form, email: e.target.value })}
-        className="w-full rounded-md border px-3 py-2"
-      />
-      <input
-        type="text"
-        placeholder="Telefone"
-        value={form.phone}
-        onChange={(e) => setForm({ ...form, phone: e.target.value })}
-        className="w-full rounded-md border px-3 py-2"
-      />
-      <input
-        type="password"
-        placeholder="Senha"
-        value={form.password}
-        onChange={(e) => setForm({ ...form, password: e.target.value })}
-        className="w-full rounded-md border px-3 py-2"
-      />
-      <Button className="bg-green-500 text-white px-4 py-2" onClick={handleSave}>
-        Salvar Alterações
-      </Button>
-    </Card>
-  );
-}
+            {form.avatar && <img src={form.avatar} alt="Avatar" className="mt-4 w-16 h-16 rounded-full" />}
+          </div>
+          <input
+            type="password"
+            placeholder="Nova Senha"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            className="w-full rounded-md border px-3 py-2"
+          />
+          <input
+            type="password"
+            placeholder="Confirme a Nova Senha"
+            value={form.confirmPassword}
+            onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+            className="w-full rounded-md border px-3 py-2"
+          />
+          <Button className="bg-green-500 text-white px-4 py-2" onClick={handleSave}>
+            Salvar Alterações
+          </Button>
+        </Card>
+      );
+    }
 
 // Configuração de permissões
 function PermissionsSettings() {
