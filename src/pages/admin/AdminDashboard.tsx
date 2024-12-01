@@ -13,7 +13,7 @@ export function AdminDashboard() {
   const [currentSection, setCurrentSection] = useState('overview');
 
   const menuItems = [
-    { id: 'overview', labeacl: 'Visão Geral', icon: LayoutDashboard, path: '/admin' },
+    { id: 'overview', label: 'Visão Geral', icon: LayoutDashboard, path: '/admin' },
     { id: 'users', label: 'Clientes', icon: Users, path: '/admin/users' },
     { id: 'orders', label: 'Pedidos', icon: ClipboardList, path: '/admin/orders' },
     { id: 'menu', label: 'Cardápio', icon: MenuIcon, path: '/admin/menu' },
