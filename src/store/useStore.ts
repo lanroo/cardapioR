@@ -5,10 +5,11 @@ interface Store {
   cart: CartItem[];
   user: User | null;
   orders: Order[];
+  menuItems: MenuItem[];
   isLoading: boolean;
   addToCart: (item: MenuItem) => void;
-  removeFromCart: (itemId: string) => void;
-  updateQuantity: (itemId: string, quantity: number) => void;
+  removeFromCart: (itemId: number) => void;
+  updateQuantity: (itemId: number, quantity: number) => void;
   clearCart: () => void;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
@@ -17,21 +18,30 @@ interface Store {
   register: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
   createGuestOrder: (customerInfo: { name: string; phone: string; address: string }) => void;
+  addMenuItem: (item: MenuItem) => void;
+  updateMenuItem: (id: number, updates: Partial<MenuItem>) => void;
+  removeMenuItem: (id: number) => void;
+  getUsers: () => User[];
+  updateUser: (userId: string, data: Partial<User>) => void;
+  deleteUser: (userId: string) => void;
+  resetPassword: (userId: string) => void;
+  updateOrderStatus: (orderId: string, newStatus: 'pending' | 'preparing' | 'delivering' | 'delivered') => void;
 }
 
+// Simulated user data
 const MOCK_USERS: User[] = [
   {
     id: '1',
     name: 'Admin',
     email: 'admin@example.com',
-    password: 'admin123', //simulação
+    password: 'admin123',
     role: 'admin',
   },
   {
     id: '2',
     name: 'Customer',
     email: 'customer@example.com',
-    password: 'customer123', // simulação
+    password: 'customer123',
     role: 'customer',
   },
 ];
@@ -40,6 +50,7 @@ export const useStore = create<Store>((set, get) => ({
   cart: [],
   user: null,
   orders: [],
+  menuItems: [],
   isLoading: false,
 
   // Adicionar item ao carrinho
@@ -105,7 +116,7 @@ export const useStore = create<Store>((set, get) => ({
     }
   },
 
-  // Registrar um novo usuário simulando uma API
+  // Registrar novo usuário
   register: async (name, email, password) => {
     set({ isLoading: true });
     try {
@@ -113,7 +124,7 @@ export const useStore = create<Store>((set, get) => ({
         id: Math.random().toString(),
         name,
         email,
-        password, // SIMULANDO
+        password,
         role: 'customer',
       };
       MOCK_USERS.push(newUser);
@@ -149,5 +160,55 @@ export const useStore = create<Store>((set, get) => ({
       orders: [...state.orders, order],
       cart: [],
     }));
+  },
+
+  // Atualizar status do pedido
+  updateOrderStatus: (orderId, newStatus) =>
+    set((state) => ({
+      orders: state.orders.map((order) =>
+        order.id === orderId ? { ...order, status: newStatus } : order
+      ),
+    })),
+
+  // Adicionar item ao cardápio
+  addMenuItem: (item) =>
+    set((state) => ({ menuItems: [...state.menuItems, item] })),
+
+  // Atualizar item do cardápio
+  updateMenuItem: (id, updates) =>
+    set((state) => ({
+      menuItems: state.menuItems.map((item) =>
+        item.id === id ? { ...item, ...updates } : item
+      ),
+    })),
+
+  // Remover item do cardápio
+  removeMenuItem: (id) =>
+    set((state) => ({
+      menuItems: state.menuItems.filter((item) => item.id !== id),
+    })),
+
+  // Gerenciar usuários
+  getUsers: () => MOCK_USERS,
+
+  updateUser: (userId, data) => {
+    const userIndex = MOCK_USERS.findIndex((u) => u.id === userId);
+    if (userIndex !== -1) {
+      MOCK_USERS[userIndex] = { ...MOCK_USERS[userIndex], ...data };
+    }
+  },
+
+  deleteUser: (userId) => {
+    const userIndex = MOCK_USERS.findIndex((u) => u.id === userId);
+    if (userIndex !== -1) {
+      MOCK_USERS.splice(userIndex, 1);
+    }
+  },
+
+  resetPassword: (userId) => {
+    const userIndex = MOCK_USERS.findIndex((u) => u.id === userId);
+    if (userIndex !== -1) {
+      MOCK_USERS[userIndex].password = 'password123'; // Simulação de redefinição de senha
+    }
   },
 }));

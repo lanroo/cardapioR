@@ -1,10 +1,8 @@
 export interface MenuItem {
-  id: string;
+  id: number; 
   name: string;
-  description: string;
   price: number;
-  image: string;
-  category: 'pizza' | 'burger' | 'drink' | 'dessert';
+  category: string;
 }
 
 export interface CartItem extends MenuItem {
