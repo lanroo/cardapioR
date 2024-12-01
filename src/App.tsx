@@ -5,7 +5,7 @@ import { LoginPage } from './pages/login';
 import { RegisterPage } from './pages/register';
 import AdminDashboard from './pages/admin/AdminDashboard';
 
-// import { CartPage } from './pages/cart';
+import CartPage from './pages/CartPage';
 import { ProtectedRoute } from './components/auth/protected-route';
 
 function App() {
