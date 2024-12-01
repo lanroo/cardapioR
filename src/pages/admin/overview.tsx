@@ -1,26 +1,26 @@
 import { useStore } from '../../store/useStore';
-import { Chart as ChartJS, BarElement, CategoryScale, LinearScale } from 'chart.js';
-import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, ArcElement } from 'chart.js';
+import { Bar, Doughnut } from 'react-chartjs-2';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement);
+ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement);
 
 export function AdminOverview() {
   const { orders } = useStore();
 
-  // Calcular estatísticas gerais
+  // Dados para os gráficos
   const totalRevenue = orders.reduce((acc, order) => acc + order.total, 0);
   const totalOrders = orders.length;
-  const totalPendingOrders = orders.filter((order) => order.status === 'pending').length;
-  const totalDeliveredOrders = orders.filter((order) => order.status === 'delivered').length;
+  const deliveredOrders = orders.filter(order => order.status === 'delivered').length;
+  const pendingOrders = orders.filter(order => order.status === 'pending').length;
 
-  // Processar dados para gráfico
   const dailyRevenue = orders.reduce((acc, order) => {
     const date = new Date(order.createdAt).toLocaleDateString();
-    acc[date] = (acc[date] || 0) + order.total;
+    if (!acc[date]) acc[date] = 0;
+    acc[date] += order.total;
     return acc;
   }, {} as Record<string, number>);
 
-  const chartData = {
+  const barData = {
     labels: Object.keys(dailyRevenue),
     datasets: [
       {
@@ -33,57 +33,67 @@ export function AdminOverview() {
     ],
   };
 
+  const doughnutData = {
+    labels: ['Entregues', 'Pendentes'],
+    datasets: [
+      {
+        data: [deliveredOrders, pendingOrders],
+        backgroundColor: ['#4CAF50', '#FFC107'],
+      },
+    ],
+  };
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Visão Geral</h1>
+      <h1 className="text-3xl font-bold">Visão Geral</h1>
 
-      {/* Estatísticas Gerais */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded shadow">
+      {/* Resumo */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-4 rounded-lg shadow">
           <h2 className="text-lg font-bold">Total de Vendas</h2>
-          <p className="text-xl">R$ {totalRevenue.toFixed(2)}</p>
+          <p className="text-2xl font-semibold text-green-600">R$ {totalRevenue.toFixed(2)}</p>
         </div>
-        <div className="bg-white p-4 rounded shadow">
+        <div className="bg-white p-4 rounded-lg shadow">
           <h2 className="text-lg font-bold">Pedidos Totais</h2>
-          <p className="text-xl">{totalOrders}</p>
+          <p className="text-2xl font-semibold">{totalOrders}</p>
         </div>
-        <div className="bg-white p-4 rounded shadow">
+        <div className="bg-white p-4 rounded-lg shadow">
           <h2 className="text-lg font-bold">Pedidos Pendentes</h2>
-          <p className="text-xl">{totalPendingOrders}</p>
-        </div>
-        <div className="bg-white p-4 rounded shadow">
-          <h2 className="text-lg font-bold">Pedidos Entregues</h2>
-          <p className="text-xl">{totalDeliveredOrders}</p>
+          <p className="text-2xl font-semibold text-yellow-600">{pendingOrders}</p>
         </div>
       </div>
 
-      {/* Gráfico de Vendas Diárias */}
-      <div className="mt-6 bg-white p-6 rounded shadow">
-        <h2 className="text-lg font-bold mb-4">Vendas Diárias</h2>
-        {Object.keys(dailyRevenue).length > 0 ? (
-          <Bar data={chartData} />
-        ) : (
-          <p className="text-gray-500">Sem dados de vendas para exibir.</p>
-        )}
+      {/* Gráficos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-bold mb-4">Vendas Diárias</h2>
+          {Object.keys(dailyRevenue).length > 0 ? (
+            <Bar data={barData} />
+          ) : (
+            <p className="text-gray-600">Sem dados para exibir.</p>
+          )}
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-bold mb-4">Status dos Pedidos</h2>
+          <Doughnut data={doughnutData} />
+        </div>
       </div>
 
-      {/* Pedidos Recentes */}
-      <div className="mt-6 bg-white p-6 rounded shadow">
+      {/* Detalhes Recentes */}
+      <div className="bg-white p-6 rounded-lg shadow mt-6">
         <h2 className="text-lg font-bold mb-4">Pedidos Recentes</h2>
         {orders.length > 0 ? (
-          <ul className="space-y-4">
-            {orders.slice(0, 5).map((order) => (
-              <li key={order.id} className="border-b pb-4">
-                <p className="font-semibold">Pedido #{order.id}</p>
-                <p>
-                  Total: <span className="font-bold">R$ {order.total.toFixed(2)}</span>
-                </p>
-                <p>Status: <span className="text-gray-600">{order.status}</span></p>
+          <ul className="divide-y">
+            {orders.slice(0, 5).map(order => (
+              <li key={order.id} className="py-2 flex justify-between">
+                <span>Pedido #{order.id}</span>
+                <span className="text-sm text-gray-600">R$ {order.total.toFixed(2)}</span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-gray-500">Nenhum pedido recente.</p>
+          <p className="text-gray-600">Nenhum pedido recente.</p>
         )}
       </div>
     </div>

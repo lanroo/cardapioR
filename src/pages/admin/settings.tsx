@@ -1,8 +1,114 @@
+import { useState } from 'react';
+import { useStore } from '../../store/useStore';
+import { Button } from '../../components/ui/button';
+import { Card } from '../../components/ui/card';
+
 export function AdminSettings() {
-    return (
-      <div className="p-4">
-        <h1 className="text-2xl font-bold">Configurações do Admin</h1>
-        <p>Essa é a página de configurações. Em breve, será implementada.</p>
+  const { user, setUser } = useStore();
+  const [activeTab, setActiveTab] = useState<'profile' | 'permissions' | 'menu'>('profile');
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Configurações</h1>
+
+      {/* Menu de abas */}
+      <div className="flex space-x-4 border-b">
+        <button
+          className={`px-4 py-2 ${activeTab === 'profile' ? 'border-b-2 border-red-500 font-bold' : ''}`}
+          onClick={() => setActiveTab('profile')}
+        >
+          Meu Perfil
+        </button>
+        <button
+          className={`px-4 py-2 ${activeTab === 'permissions' ? 'border-b-2 border-red-500 font-bold' : ''}`}
+          onClick={() => setActiveTab('permissions')}
+        >
+          Regras & Permissões
+        </button>
+        <button
+          className={`px-4 py-2 ${activeTab === 'menu' ? 'border-b-2 border-red-500 font-bold' : ''}`}
+          onClick={() => setActiveTab('menu')}
+        >
+          Cardápio
+        </button>
       </div>
-    );
-  }
+
+      {/* Conteúdo da aba ativa */}
+      {activeTab === 'profile' && <ProfileSettings user={user} setUser={setUser} />}
+      {activeTab === 'permissions' && <PermissionsSettings />}
+      {activeTab === 'menu' && <MenuSettings />}
+    </div>
+  );
+}
+
+// Configuração do perfil
+function ProfileSettings({ user, setUser }: { user: any; setUser: any }) {
+  const [form, setForm] = useState({
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    password: '',
+  });
+
+  const handleSave = () => {
+    setUser({ ...user, ...form });
+    alert('Perfil atualizado!');
+  };
+
+  return (
+    <Card className="p-6 space-y-4">
+      <h2 className="text-xl font-bold">Editar Perfil</h2>
+      <input
+        type="text"
+        placeholder="Nome"
+        value={form.name}
+        onChange={(e) => setForm({ ...form, name: e.target.value })}
+        className="w-full rounded-md border px-3 py-2"
+      />
+      <input
+        type="email"
+        placeholder="Email"
+        value={form.email}
+        onChange={(e) => setForm({ ...form, email: e.target.value })}
+        className="w-full rounded-md border px-3 py-2"
+      />
+      <input
+        type="text"
+        placeholder="Telefone"
+        value={form.phone}
+        onChange={(e) => setForm({ ...form, phone: e.target.value })}
+        className="w-full rounded-md border px-3 py-2"
+      />
+      <input
+        type="password"
+        placeholder="Senha"
+        value={form.password}
+        onChange={(e) => setForm({ ...form, password: e.target.value })}
+        className="w-full rounded-md border px-3 py-2"
+      />
+      <Button className="bg-green-500 text-white px-4 py-2" onClick={handleSave}>
+        Salvar Alterações
+      </Button>
+    </Card>
+  );
+}
+
+// Configuração de permissões
+function PermissionsSettings() {
+  return (
+    <Card className="p-6">
+      <h2 className="text-xl font-bold">Gerenciar Permissões</h2>
+      <p>Funcionalidade para criar, editar ou remover permissões de usuários.</p>
+    </Card>
+  );
+}
+
+// Configuração do cardápio
+function MenuSettings() {
+  return (
+    <Card className="p-6">
+      <h2 className="text-xl font-bold">Configurar Cardápio</h2>
+      <p>Funcionalidade para personalizar o cardápio, como categorias, cores e imagens.</p>
+    </Card>
+  );
+}

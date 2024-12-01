@@ -49,7 +49,52 @@ const MOCK_USERS: User[] = [
 export const useStore = create<Store>((set, get) => ({
   cart: [],
   user: null,
-  orders: [],
+  orders: [
+    {
+      id: '1',
+      items: [
+        { id: 1, name: 'Pizza Margherita', price: 25, category: 'Pizza', quantity: 2 },
+        { id: 2, name: 'Hambúrguer Clássico', price: 18, category: 'Hambúrguer', quantity: 1 },
+      ],
+      status: 'delivered',
+      total: 68,
+      createdAt: new Date(new Date().setDate(new Date().getDate() - 2)), // Pedido de 2 dias atrás
+      customerInfo: {
+        name: 'Marcos Vinicius',
+        phone: '11999999999',
+        address: 'Rua Mirian, 123',
+      },
+    },
+    {
+      id: '2',
+      items: [
+        { id: 3, name: 'Pizza Pepperoni', price: 30, category: 'Pizza', quantity: 1 },
+      ],
+      status: 'pending',
+      total: 30,
+      createdAt: new Date(), // Pedido de hoje
+      customerInfo: {
+        name: 'Laura Simone',
+        phone: '21988888888',
+        address: 'Avenida Lisboa, 456',
+      },
+    },
+    {
+      id: '3',
+      items: [
+        { id: 4, name: 'Batata Frita', price: 10, category: 'Acompanhamento', quantity: 3 },
+      ],
+      status: 'delivering',
+      total: 30,
+      createdAt: new Date(new Date().setDate(new Date().getDate() - 1)), // Pedido de ontem
+      customerInfo: {
+        name: 'Michael Jackson',
+        phone: '31977777777',
+        address: 'Praça da Liberdade, 189',
+      },
+    },
+  ],
+  
   menuItems: [],
   isLoading: false,
 
@@ -211,4 +256,5 @@ export const useStore = create<Store>((set, get) => ({
       MOCK_USERS[userIndex].password = 'password123'; // Simulação de redefinição de senha
     }
   },
+
 }));
