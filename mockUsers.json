@@ -1,0 +1,19 @@
+[
+    {
+      "id": "1",
+      "name": "Admin",
+      "email": "admin@example.com",
+      "password": "admin123",
+      "role": "admin",
+      "permissions": ["manage_users", "manage_menu", "manage_orders", "manage_settings"]
+    },
+    {
+      "id": "2",
+      "name": "Customer",
+      "email": "customer@example.com",
+      "password": "customer123",
+      "role": "customer",
+      "permissions": ["view_menu"]
+    }
+  ]
+  
