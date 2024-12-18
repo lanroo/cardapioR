@@ -7,6 +7,7 @@ interface Store {
   orders: Order[];
   menuItems: MenuItem[];
   isLoading: boolean;
+  permissions: string[];
   addToCart: (item: MenuItem) => void;
   removeFromCart: (itemId: number) => void;
   updateQuantity: (itemId: number, quantity: number) => void;
@@ -26,9 +27,10 @@ interface Store {
   deleteUser: (userId: string) => void;
   resetPassword: (userId: string) => void;
   updateOrderStatus: (orderId: string, newStatus: 'pending' | 'preparing' | 'delivering' | 'delivered') => void;
+  hasPermission: (permission: string) => boolean; // Função para verificar uma permissão específica
+  checkPermission: (requiredPermissions: string[]) => boolean; // Verificar permissões
 }
 
-// Simulated user data
 const MOCK_USERS: User[] = [
   {
     id: '1',
@@ -36,6 +38,7 @@ const MOCK_USERS: User[] = [
     email: 'admin@example.com',
     password: 'admin123',
     role: 'admin',
+    permissions: ['manage_users', 'manage_menu', 'manage_orders', 'manage_settings'],
   },
   {
     id: '2',
@@ -43,60 +46,28 @@ const MOCK_USERS: User[] = [
     email: 'customer@example.com',
     password: 'customer123',
     role: 'customer',
+    permissions: ['view_menu'],
   },
 ];
 
 export const useStore = create<Store>((set, get) => ({
   cart: [],
   user: null,
-  orders: [
-    {
-      id: '1',
-      items: [
-        { id: 1, name: 'Pizza Margherita', price: 25, category: 'Pizza', quantity: 2 },
-        { id: 2, name: 'Hambúrguer Clássico', price: 18, category: 'Hambúrguer', quantity: 1 },
-      ],
-      status: 'delivered',
-      total: 68,
-      createdAt: new Date(new Date().setDate(new Date().getDate() - 2)), // Pedido de 2 dias atrás
-      customerInfo: {
-        name: 'Marcos Vinicius',
-        phone: '11999999999',
-        address: 'Rua Mirian, 123',
-      },
-    },
-    {
-      id: '2',
-      items: [
-        { id: 3, name: 'Pizza Pepperoni', price: 30, category: 'Pizza', quantity: 1 },
-      ],
-      status: 'pending',
-      total: 30,
-      createdAt: new Date(), // Pedido de hoje
-      customerInfo: {
-        name: 'Laura Simone',
-        phone: '21988888888',
-        address: 'Avenida Lisboa, 456',
-      },
-    },
-    {
-      id: '3',
-      items: [
-        { id: 4, name: 'Batata Frita', price: 10, category: 'Acompanhamento', quantity: 3 },
-      ],
-      status: 'delivering',
-      total: 30,
-      createdAt: new Date(new Date().setDate(new Date().getDate() - 1)), // Pedido de ontem
-      customerInfo: {
-        name: 'Michael Jackson',
-        phone: '31977777777',
-        address: 'Praça da Liberdade, 189',
-      },
-    },
-  ],
-  
+  orders: [],
   menuItems: [],
   isLoading: false,
+  permissions: [],
+
+  // Função para verificar uma permissão específica
+  hasPermission: (permission: string) => {
+    const { permissions } = get();
+    return permissions.includes(permission);
+  },
+
+  // Função para verificar múltiplas permissões
+  checkPermission: (requiredPermissions: string[]) => {
+    return requiredPermissions.every((perm) => get().hasPermission(perm));
+  },
 
   // Adicionar item ao carrinho
   addToCart: (item) =>
@@ -131,8 +102,14 @@ export const useStore = create<Store>((set, get) => ({
   // Limpar carrinho
   clearCart: () => set({ cart: [] }),
 
-  // Definir usuário
-  setUser: (user) => set({ user, isLoading: false }),
+  // Definir usuário e permissões
+  setUser: (user) => {
+    const permissions =
+      user?.role === 'admin'
+        ? ['manage_users', 'manage_menu', 'manage_orders', 'manage_settings']
+        : ['view_menu', 'place_orders'];
+    set({ user, permissions });
+  },
 
   // Definir estado de carregamento
   setLoading: (loading) => set({ isLoading: loading }),
@@ -149,7 +126,7 @@ export const useStore = create<Store>((set, get) => ({
     try {
       const user = MOCK_USERS.find((u) => u.email === email && u.password === password);
       if (user) {
-        set({ user, isLoading: false });
+        set({ user, permissions: user.permissions, isLoading: false });
         return true;
       }
       set({ isLoading: false });
@@ -171,9 +148,10 @@ export const useStore = create<Store>((set, get) => ({
         email,
         password,
         role: 'customer',
+        permissions: ['view_menu'],
       };
       MOCK_USERS.push(newUser);
-      set({ user: newUser, isLoading: false });
+      set({ user: newUser, permissions: newUser.permissions, isLoading: false });
       return true;
     } catch (error) {
       console.error('Erro no registro:', error);
@@ -184,7 +162,7 @@ export const useStore = create<Store>((set, get) => ({
 
   // Logout
   logout: () => {
-    set({ user: null, isLoading: false });
+    set({ user: null, isLoading: false, permissions: [] });
   },
 
   // Criar pedido como visitante
@@ -240,6 +218,9 @@ export const useStore = create<Store>((set, get) => ({
     const userIndex = MOCK_USERS.findIndex((u) => u.id === userId);
     if (userIndex !== -1) {
       MOCK_USERS[userIndex] = { ...MOCK_USERS[userIndex], ...data };
+      set(() => ({
+      
+      }));
     }
   },
 
@@ -247,14 +228,21 @@ export const useStore = create<Store>((set, get) => ({
     const userIndex = MOCK_USERS.findIndex((u) => u.id === userId);
     if (userIndex !== -1) {
       MOCK_USERS.splice(userIndex, 1);
+      set(() => ({
+      
+      }));
     }
   },
 
   resetPassword: (userId) => {
-    const userIndex = MOCK_USERS.findIndex((u) => u.id === userId);
+    const userIndex = MOCK_USERS.findIndex((u) =>
+
+ u.id === userId);
     if (userIndex !== -1) {
-      MOCK_USERS[userIndex].password = 'password123'; // Simulação de redefinição de senha
+      MOCK_USERS[userIndex].password = 'password123';
+      set(() => ({
+       
+      }));
     }
   },
-
 }));

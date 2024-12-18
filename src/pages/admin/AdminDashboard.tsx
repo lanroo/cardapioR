@@ -1,16 +1,17 @@
-import { useState } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, ClipboardList, Menu as MenuIcon, Settings } from 'lucide-react';
 import { AdminOverview } from './overview';
 import { AdminUsers } from './users';
 import { AdminOrders } from './orders';
 import { AdminMenu } from './menu';
-import { AdminSettings } from './settings';
 import { Button } from '../../components/ui/button';
+
 
 export function AdminDashboard() {
   const navigate = useNavigate();
-  const [currentSection, setCurrentSection] = useState('overview');
+  const location = useLocation(); 
+  const [currentSection, setCurrentSection] = useState<string>('overview');
 
   const menuItems = [
     { id: 'overview', label: 'Visão Geral', icon: LayoutDashboard, path: '/admin' },
@@ -19,6 +20,14 @@ export function AdminDashboard() {
     { id: 'menu', label: 'Cardápio', icon: MenuIcon, path: '/admin/menu' },
     { id: 'settings', label: 'Configurações', icon: Settings, path: '/admin/settings' },
   ];
+
+  // Atualizar a seção ativa com base na URL
+  useEffect(() => {
+    const activeMenu = menuItems.find((item) => location.pathname.includes(item.path));
+    if (activeMenu) {
+      setCurrentSection(activeMenu.id);
+    }
+  }, [location.pathname]);
 
   return (
     <div className="flex h-[calc(100vh-4rem)]">
